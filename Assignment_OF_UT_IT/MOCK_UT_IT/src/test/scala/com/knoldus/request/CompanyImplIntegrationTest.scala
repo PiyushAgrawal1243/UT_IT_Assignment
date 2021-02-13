@@ -1,30 +1,45 @@
 package com.knoldus.request
 
+import com.knoldus.db.CompanyReadDto
 import com.knoldus.models.Company
-import com.knoldus.validator.CompanyValidator
-import org.mockito.MockitoSugar.{mock, when}
+import com.knoldus.validator.{CompanyValidator, EmailValidator}
 import org.scalatest.AsyncFlatSpec
 
 class CompanyImplIntegrationTest extends AsyncFlatSpec {
 
+  val companyReadDto = new CompanyReadDto
+  val emailValidator = new EmailValidator
+  val companyValidator = new CompanyValidator
+  val companyImpl = new CompanyImpl(companyValidator)
 
-    val mockedCompanyValidate: CompanyValidator = mock[CompanyValidator]
+  "Company" should "not get created as it already exists" in {
     val knoldusCompany: Company = Company("Knoldus", "knoldus@gmail.com", "Noida")
-    val googleCompany: Company = Company("Google", "google@gmail.com", "Noida")
+    val result =  companyImpl.createCompany(knoldusCompany)
+    var valid =emailValidator.emailIdIsValid(knoldusCompany.emailId)
+    assert(result==Some("Knoldus") && valid)
+  }
 
-    "Company" should "be created" in {
+  it should "not get created as email id is invalid" in {
+    val knoldusCompany: Company = Company("Knoldus", "abc.com", "Noida")
+    val result =  companyImpl.createCompany(knoldusCompany)
+    var valid =emailValidator.emailIdIsValid(knoldusCompany.emailId)
 
-      val companyImpl = new CompanyImpl(mockedCompanyValidate)
-      when(mockedCompanyValidate.companyIsValid(knoldusCompany)) thenReturn true
-      val result = companyImpl.createCompany(knoldusCompany)
-      assert(result.isDefined)
-    }
+    assert(result==Some("Knoldus") && !valid)
+  }
 
-    "Company" should "not be created" in {
+  it should "not get created as email id is invalid and company already exists" in {
+    val knoldusCompany: Company = Company("Knoldus", "gmail.inc", "Noida")
+    val result =  companyImpl.createCompany(knoldusCompany)
 
-      val companyImpl = new CompanyImpl(mockedCompanyValidate)
-      when(mockedCompanyValidate.companyIsValid(googleCompany)) thenReturn false
-      val result = companyImpl.createCompany(googleCompany)
-      assert(result.isEmpty)
-    }
+    var valid =emailValidator.emailIdIsValid(knoldusCompany.emailId)
+    assert(result==Some("Knoldus") && !valid)
+  }
+
+  "Company" should "get created" in {
+    val KsolveCompany: Company = Company("Ksolve", "Ksolve@gmail.com", "Noida")
+    val result =  companyImpl.createCompany(KsolveCompany)
+    var valid =emailValidator.emailIdIsValid(KsolveCompany.emailId)
+    assert(result==None && valid)
+  }
+
   }

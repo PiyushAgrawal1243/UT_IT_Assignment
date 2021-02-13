@@ -19,7 +19,7 @@ class EmployeeImplTest extends AsyncFlatSpec {
     assert(result==Some("piyushagarawal@gmail.com") && valid)
   }
 
-  it should "be invalid as company does not exist" in {
+  it should "be invalid as employee does not exist" in {
     val klausEmployee: Employee = Employee("Klaus","Mickelson",30,40000,"Software Trainee","Wipro","niklaus@wipro.com")
     val result =  employeeImpl.createEmployee(klausEmployee)
     var  valid = emailValidator.emailIdIsValid(klausEmployee.emailId)
