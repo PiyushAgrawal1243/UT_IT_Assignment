@@ -23,9 +23,10 @@ class UserImplTest extends AsyncFlatSpec {
 
   "User" should "not valid" in {
     val userImpl = new UserImpl(mockedUserValidate)
-    when(mockedUserValidate.userIsValid(piyushUser)) thenReturn false
-    val result = userImpl.createUser(piyushUser)
-    assert(result.isEmpty)
+    when(mockedUserValidate.userIsValid(shivUser)) thenReturn false
+    val result = userImpl.createUser(shivUser)
+    val emailvalid = mockemailValidator.emailIdIsValid(shivUser.emailId)
+    assert(result.isEmpty  && emailvalid)
   }
 
 
