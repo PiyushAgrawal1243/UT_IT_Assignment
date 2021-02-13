@@ -1,38 +1,50 @@
-package  com.knoldus.Validator
+package com.knoldus.Validator
+
 import com.knoldus.db.CompanyReadDto
 import com.knoldus.models.Company
-import com.knoldus.request.CompanyImpl
 import com.knoldus.validator.{CompanyValidator, EmailValidator}
+import org.mockito.MockitoSugar.{mock, when}
 import org.scalatest.AsyncFlatSpec
 
 class CompanyValidatorTest extends AsyncFlatSpec {
-  val companyReadDto = new CompanyReadDto
-  val emailValidator = new EmailValidator
-  val companyValidator = new CompanyValidator
-  val companyImpl = new CompanyImpl(companyValidator)
 
+  val knoldusCompany: Company = Company("Knoldus", "knoldus@gmail.com", "Noida")
+  val mockedCompanyReadDto: CompanyReadDto = mock[CompanyReadDto]
+  val mockedEmailValidator: EmailValidator = mock[EmailValidator]
 
-  "company" should "return: already exists" in {
-    val knoldusCompany: Company = Company("Knoldus", "knoldus@gmail.com", "Noida")
+  "Company" should "be valid" in {
+
+    when(mockedCompanyReadDto.getCompanyByName(knoldusCompany.name)) thenReturn Option(knoldusCompany)
+    when(mockedEmailValidator.emailIdIsValid(knoldusCompany.emailId)) thenReturn true
+    val companyValidator = new CompanyValidator()
     val result = companyValidator.companyIsValid(knoldusCompany)
     assert(result)
   }
 
-  it should "return 'invalid email id'" in {
-    val philipsCompany: Company = Company("Philips", "abc", "Noida")
-    val result = companyValidator.companyIsValid(philipsCompany)
-    val emailvaild =emailValidator.emailIdIsValid(philipsCompany.emailId)
-    assert(result && !emailvaild)
-  }
+  "Company" should "be invalid as it already exists in the DB" in {
 
-  it should "return 'invalid email id and company already exists'" in {
-    val knoldusCompany: Company = Company("Knoldus", "knoldus@gmail", "Noida")
+    when(mockedCompanyReadDto.getCompanyByName(knoldusCompany.name)) thenReturn None
+    when(mockedEmailValidator.emailIdIsValid(knoldusCompany.emailId)) thenReturn true
+    val companyValidator = new CompanyValidator()
     val result = companyValidator.companyIsValid(knoldusCompany)
-    val emailvaild =emailValidator.emailIdIsValid(knoldusCompany.emailId)
-
-    assert(result && !emailvaild)
+    assert(result)
   }
 
+  "Company" should "be valid as the email id is invalid" in {
 
+    when(mockedCompanyReadDto.getCompanyByName(knoldusCompany.name)) thenReturn Option(knoldusCompany)
+    when(mockedEmailValidator.emailIdIsValid(knoldusCompany.emailId)) thenReturn false
+    val companyValidator = new CompanyValidator()
+    val result = companyValidator.companyIsValid(knoldusCompany)
+    assert(result)
+  }
 
+  "Company" should "be invalid as the email id is not valid and it already exists in DB " in {
+
+    when(mockedCompanyReadDto.getCompanyByName(knoldusCompany.name)) thenReturn None
+    when(mockedEmailValidator.emailIdIsValid(knoldusCompany.emailId)) thenReturn false
+    val companyValidator = new CompanyValidator()
+    val result = companyValidator.companyIsValid(knoldusCompany)
+    assert(result)
+  }
 }
