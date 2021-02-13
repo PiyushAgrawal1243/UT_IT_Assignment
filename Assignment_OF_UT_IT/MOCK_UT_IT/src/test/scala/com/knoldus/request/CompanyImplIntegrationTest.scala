@@ -16,6 +16,7 @@ class CompanyImplIntegrationTest extends AsyncFlatSpec {
     val knoldusCompany: Company = Company("Knoldus", "knoldus@gmail.com", "Noida")
     val result =  companyImpl.createCompany(knoldusCompany)
     var valid =emailValidator.emailIdIsValid(knoldusCompany.emailId)
+
     assert(result==Some("Knoldus") && valid)
   }
 
