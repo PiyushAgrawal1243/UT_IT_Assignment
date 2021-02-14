@@ -1,46 +1,49 @@
 package com.knoldus.request
-
 import com.knoldus.db.CompanyReadDto
 import com.knoldus.models.Company
 import com.knoldus.validator.{CompanyValidator, EmailValidator}
-import org.scalatest.AsyncFlatSpec
+import org.scalatest.AsyncFunSuite
 
-class CompanyImplIntegrationTest extends AsyncFlatSpec {
 
-  val companyReadDto = new CompanyReadDto
-  val emailValidator = new EmailValidator
+class CompanyImplIntegrationTest extends AsyncFunSuite {
+
   val companyValidator = new CompanyValidator
   val companyImpl = new CompanyImpl(companyValidator)
 
-  "Company" should "not get created as it already exists" in {
-    val knoldusCompany: Company = Company("Knoldus", "knoldus@gmail.com", "Noida")
-    val result =  companyImpl.createCompany(knoldusCompany)
-    var valid =emailValidator.emailIdIsValid(knoldusCompany.emailId)
+  val companyReadDto = new CompanyReadDto
+  val emailValidator = new EmailValidator
 
-    assert(result==Some("Knoldus") && valid)
+
+
+  // Integration testing for the methods of CompanyImpl class by providing wanted class's objects.
+
+  val company1: Company = Company("HCL", "HCL@gmail.com", "noida")
+  test("Correct company name & EmailID") {
+    assert(!companyImpl.createCompany(company1).contains(company1.name))
   }
 
-  it should "not get created as email id is invalid" in {
-    val knoldusCompany: Company = Company("Knoldus", "abc.com", "Noida")
-    val result =  companyImpl.createCompany(knoldusCompany)
-    var valid =emailValidator.emailIdIsValid(knoldusCompany.emailId)
-
-    assert(result==Some("Knoldus") && !valid)
+  val company2: Company = Company("HCL", "HCLgmail.com", "noida")
+  test("Correct company name & Wrong EmailID") {
+    println()
+    assert(!companyImpl.createCompany(company2).contains(company2.name))
   }
 
-  it should "not get created as email id is invalid and company already exists" in {
-    val knoldusCompany: Company = Company("Knoldus", "gmail.inc", "Noida")
-    val result =  companyImpl.createCompany(knoldusCompany)
-
-    var valid =emailValidator.emailIdIsValid(knoldusCompany.emailId)
-    assert(result==Some("Knoldus") && !valid)
+  val company3: Company = Company("Knoldus", "knoldus@gmail.com", "noida")
+  test("Wrong  company name & Correct EmailID") {
+    println()
+    assert(companyImpl.createCompany(company3).contains(company3.name))
   }
 
-  "Company" should "get created" in {
-    val KsolveCompany: Company = Company("Ksolve", "Ksolve@gmail.com", "Noida")
-    val result =  companyImpl.createCompany(KsolveCompany)
-    var valid =emailValidator.emailIdIsValid(KsolveCompany.emailId)
-    assert(result==None && valid)
+  val company4: Company = Company("Knoldus", "knoldusgmail.com", "noida")
+  test("Wrong company name & EmailID") {
+    println()
+    assert(companyImpl.createCompany(company4).contains(company4.name))
   }
 
+  val company5: Company = Company("Diamond", "diamond@gmail.com", "noida")
+  test("Correct company's name & EmailID") {
+    println()
+    assert(!companyImpl.createCompany(company5).contains(company5.name))
   }
+
+}
